@@ -12,6 +12,7 @@ phases:
     commands:
       # Discover and run unit tests in the 'tests' directory
       # - npm test
+      - npm -v
       - PUBLIC_URL="$WEBSITE_S3_PREFIX" npm run build
   build:
     commands:
