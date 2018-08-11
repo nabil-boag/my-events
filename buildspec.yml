@@ -5,18 +5,18 @@ phases:
     commands:
       # Install dependencies needed for running tests
       - npm install
-
+      
       # Upgrade AWS CLI to the latest version
       - pip install --upgrade awscli
   pre_build:
     commands:
       # Discover and run unit tests in the 'tests' directory
-      - npm test
+      # - npm test
+      - PUBLIC_URL="$WEBSITE_S3_PREFIX" npm run build
   build:
     commands:
       # Use AWS SAM to package the application by using AWS CloudFormation
-      - aws s3 cp --recursive public/ s3://$WEBSITE_S3_BUCKET/public/ --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
-      - sed -i -e "s|/static/|$WEBSITE_S3_PREFIX/public/static/|g" public/index.html
+      - aws s3 cp --recursive build/ s3://$WEBSITE_S3_BUCKET/build/ --grants read=uri=http://acs.amazonaws.com/groups/global/AllUsers
       - aws cloudformation package --template template.yml --s3-bucket $S3_BUCKET --output-template template-export.yml
 
 artifacts:

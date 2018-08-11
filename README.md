@@ -1,64 +1,92 @@
-Welcome to the AWS CodeStar sample web application
-==================================================
+# Introduction
 
-This sample code helps get you started with a simple Node.js web service deployed by AWS CloudFormation to AWS Lambda and Amazon API Gateway.
+This is a Starter React application for using the Sample app in the AWS AppSync console when building your GraphQL API. The Sample app creates a GraphQL schema and provisions Amazon DynamoDB resources, then connects them appropriately with Resolvers. The application demonstrates GraphQL Mutations, Queries and Subscriptions using AWS AppSync. You can use this for learning purposes or adapt either the application or the GraphQL Schema to meet your needs.
 
-What's Here
------------
+![EventDetails](media/AllEvents.png)
+![EventDetails](media/CreateEvent.png)
 
-This sample includes:
+## Features
 
-* README.md - this file
-* buildspec.yml - this file is used by AWS CodeBuild to package your
-  application for deployment to AWS Lambda
-* index.js - this file contains the sample Node.js code for the web service
-* template.yml - this file contains the AWS Serverless Application Model (AWS SAM) used
-  by AWS CloudFormation to deploy your application to AWS Lambda and Amazon API
-  Gateway.
-* tests/ - this directory contains unit tests for your application
+- GraphQL Mutations
+  - Create new events
+  - Create comments on existing events
+
+- GraphQL Queries
+  - Get all events
+  - Get an event by Id
+
+- GraphQL Subscriptions
+  - Real time updates for comments on an event
+
+- Authorization
+  - The app uses API Key as the authorization mechanism
+
+## AWS Setup
+
+1. Navigate to the AWS AppSync console using the URL: http://console.aws.amazon.com/appsync/home
+
+2. Click on `Create API` and select the `Sample Schema` option. Enter a API name of your choice. Click `Create`.
 
 
-What Do I Do Next?
-------------------
+## React Setup
 
-If you have checked out a local copy of your repository you can start making
-changes to the sample code.  We suggest making a small change to index.js first,
-so you can see how changes pushed to your project's repository are automatically
-picked up by your project pipeline and deployed to AWS Lambda and Amazon API Gateway.
-(You can watch the pipeline progress on your AWS CodeStar project dashboard.)
-Once you've seen how that works, start developing your own code, and have fun!
+First, clone this repo:
 
-To run your tests locally, go to the root directory of the
-sample code and run the `npm test` command, which
-AWS CodeBuild also runs through your `buildspec.yml` file.
+```
+git clone https://github.com/aws-samples/aws-mobile-appsync-events-starter-react.git
+cd ./aws-mobile-appsync-events-starter-react
+```
 
-To test your new code during the release process, modify the existing tests or
-add tests to the tests directory. AWS CodeBuild will run the tests during the
-build stage of your project pipeline. You can find the test results
-in the AWS CodeBuild console.
+From the homepage of your GraphQL API (you can click the name you entered in the left hand navigation) wait until the progress bar at the top has completed deploying your resources.
 
-Learn more about AWS CodeBuild and how it builds and tests your application here:
-https://docs.aws.amazon.com/codebuild/latest/userguide/concepts.html
+On this same page, select `Web` at the bottom to download your `AppSync.js` configuration file into your project's `./src` directory.
 
-Learn more about AWS Serverless Application Model (AWS SAM) and how it works here:
-https://github.com/awslabs/serverless-application-model/blob/master/HOWTO.md
+or create `AppSync.js` with the following content.
 
-AWS Lambda Developer Guide:
-http://docs.aws.amazon.com/lambda/latest/dg/deploying-lambda-apps.html
+```
+const config = {
+  graphqlEndpoint: 'https://XXXXXXXXXXXXXXXXXXXXXXXXXX.appsync-api.XX-XXXX-X.amazonaws.com/graphql', // Your hostname
+  region: 'XX-XXXX-X',  //Your region
+  authenticationType: 'XXX_XXX', // API_KEY or AWS_IAM or AMAZON_COGNITO_USER_POOLS
+  apiKey: 'XXX-XXXXXXXXXXXXXXXXXXXXXX',
+}
+export default config;
+```
+You can get the `graphqlEndpoint`, `authenticationType` and `apiKey` from the settings page.
 
-Learn more about AWS CodeStar by reading the user guide, and post questions and
-comments about AWS CodeStar on our forum.
+Start the application:
 
-User Guide: http://docs.aws.amazon.com/codestar/latest/userguide/welcome.html
+```
+yarn
+yarn start
+```
 
-Forum: https://forums.aws.amazon.com/forum.jspa?forumID=248
+## Application Walkthrough
 
-What Should I Do Before Running My Project in Production?
-------------------
+### ./src/App.js
 
-AWS recommends you review the security best practices recommended by the framework
-author of your selected sample application before running it in production. You
-should also regularly review and apply any available patches or associated security
-advisories for dependencies used within your application.
+- Sets up the application navigation between screens using `BrowserRouter` from React Router.
+- Configures the `AWSAppSyncClient` using an API Key. This can be confugured to use Amazon Cognito Identity or Amazon Cognito User Pools as well.
 
-Best Practices: https://docs.aws.amazon.com/codestar/latest/userguide/best-practices.html?icmpid=docs_acs_rm_sec
+
+### ./Components/AllEvents.js
+
+- Uses Higher Order Components for making GraphQL calls to AWS AppSync.
+- View to display all the events from `./GraphQL/QueryAllEvents.js`
+- Allows you to delete individual events. This will use `./GraphQL/MutationDeleteEvent.js`
+
+### ./Components/NewEvent.js
+
+- Uses Higher Order Components for making GraphQL calls to AWS AppSync.
+- View to create a new event using `./GraphQL/MutationCreateEvent.js`
+
+### ./Components/ViewEvent.js and EventComment.js
+
+- Uses Higher Order Components for making GraphQL calls to AWS AppSync.
+- `ViewEvent` gets all the comments for a specific event when page loads with a GraphQL query defined in `./GraphQL/QueryGetEvent`
+- Once the page loads, `EventComments` sets up a GraphQL subscription using `./GraphQL/SubscriptionEventComments` to display any new comments on an event in realtime.
+
+### ./GraphQL Directory
+
+- Contains GraphQL queries and mutations for interacting with AWS AppSync.
+
